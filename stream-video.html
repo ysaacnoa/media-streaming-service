@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Portrait Video Player</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: #000; /* Fondo negro estilo app */
+        font-family: Arial, sans-serif;
+      }
+
+      .phone-frame {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        
+        overflow: hidden;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
+        background: black;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      video {
+        height: 100%;
+        object-fit: cover; /* 🔥 Esto lo ajusta como un cover */
+      }
+
+      .video-title {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        color: white;
+        font-size: 1rem;
+        background: rgba(0, 0, 0, 0.4);
+        padding: 6px 10px;
+        border-radius: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="phone-frame">
+      <div class="video-title">📱 Portrait Cover</div>
+      <video id="video" controls autoplay muted playsinline></video>
+    </div>
+
+    <script>
+      const video = document.getElementById('video');
+      const videoSrc =
+        'http://localhost:3000/adaptive-streaming/0dbde247-6b41-4896-9eef-89baff25eda1/master.m3u8';
+
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(videoSrc);
+        hls.attachMedia(video);
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = videoSrc;
+      }
+    </script>
+  </body>
+</html>

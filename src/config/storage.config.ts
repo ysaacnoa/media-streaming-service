@@ -14,6 +14,9 @@ export const STORAGE_PATHS = {
   /** Directory for metadata JSON files */
   meta: path.join('storage', 'meta'),
 
+  /** Directory for adaptive streaming (HLS outputs) */
+  hls: path.join('storage', 'hls'),
+
   /**
    * Resolve the full path for a given uploaded filename.
    * Always uses forward slashes, safe for frontend consumption.
@@ -31,4 +34,16 @@ export const STORAGE_PATHS = {
    */
   getMetaPath: (id: string) =>
     path.join(STORAGE_PATHS.meta, `${id}.json`).split(path.sep).join('/'),
+
+  /**
+   * Resolve the output directory for HLS files of a given video.
+   */
+  getHlsPath: (id: string) =>
+    path.join(STORAGE_PATHS.hls, id).split(path.sep).join('/'),
+
+  /**
+   * Resolve the master playlist path for a given video.
+   */
+  getHlsMasterPlaylist: (id: string) =>
+    path.join(STORAGE_PATHS.hls, id, 'master.m3u8').split(path.sep).join('/'),
 };

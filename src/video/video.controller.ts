@@ -1,17 +1,16 @@
 import {
+  BadRequestException,
+  Body,
   Controller,
   Post,
   UploadedFile,
   UseInterceptors,
-  Body,
-  BadRequestException,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiConsumes, ApiBody } from '@nestjs/swagger';
-import { VideoService } from './video.service';
+import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { CreateVideoDto } from './dto/create-video.dto';
-import { MulterAdapter } from './helpers/multer-adapter';
 import { VideoRecord } from './types/video-record.type';
+import { VideoService } from './video.service';
+import { VideoUploadInterceptor } from './interceptor/video.interceptor';
 
 @ApiTags('video')
 @Controller('video')
@@ -31,7 +30,7 @@ export class VideoController {
     description: 'Video file and metadata',
     type: CreateVideoDto,
   })
-  @UseInterceptors(FileInterceptor('file', MulterAdapter.videoUploadOptions()))
+  @UseInterceptors(VideoUploadInterceptor)
   async uploadVideo(
     @UploadedFile() file: Express.Multer.File,
     @Body() dto: CreateVideoDto,

@@ -1,7 +1,7 @@
 import { diskStorage, Options, FileFilterCallback } from 'multer';
 import { extname } from 'path';
-import { STORAGE_PATHS } from 'src/config/storage.config';
 import { Request } from 'express';
+import { IStorageService } from 'src/storage/types/storage.types';
 
 /**
  * MulterAdapter acts as a centralized helper for configuring Multer
@@ -24,12 +24,12 @@ export class MulterAdapter {
    * uploadVideo(@UploadedFile() file: Express.Multer.File) { ... }
    * ```
    */
-  static videoUploadOptions(maxSizeMB = 100): Options {
+  static videoUploadOptions(storage: IStorageService, maxSizeMB = 100): Options {
     return {
       /** Storage configuration: defines where and how files are saved */
       storage: diskStorage({
         /** Destination folder on disk where uploaded files are stored */
-        destination: STORAGE_PATHS.uploads,
+        destination: storage.getUploadsDir(),
 
         /**
          * Generates a unique filename for each uploaded file.

@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import * as fs from 'fs-extra';
-import { STORAGE_PATHS } from 'src/config/storage.config';
-import { AdaptiveStreamingJob, AdaptiveStreamingStatus } from './types/adaptive-streaming.type';
 import { FfmpegAdapter } from 'src/adaptive-streaming/helpers/ffmpeg-adapter';
+import { StorageService } from 'src/storage/storage.service';
+import {
+  AdaptiveStreamingJob,
+  AdaptiveStreamingStatus,
+} from './types/adaptive-streaming.type';
 
 /**
  * AdaptiveStreamingService manages the lifecycle of adaptive video streaming jobs.
@@ -14,7 +16,7 @@ import { FfmpegAdapter } from 'src/adaptive-streaming/helpers/ffmpeg-adapter';
  *
  * Works in conjunction with:
  * - {@link FfmpegAdapter} for FFmpeg/FFprobe low-level operations.
- * - {@link STORAGE_PATHS} for filesystem output paths.
+ * - {@link StorageService} for filesystem output paths.
  */
 @Injectable()
 export class AdaptiveStreamingService {
@@ -24,6 +26,8 @@ export class AdaptiveStreamingService {
    * Value: {@link AdaptiveStreamingJob}
    */
   private jobs: Map<string, AdaptiveStreamingJob> = new Map();
+
+  constructor(private readonly storage: StorageService) {}
 
   /**
    * Starts processing a video for adaptive streaming.
@@ -56,9 +60,12 @@ export class AdaptiveStreamingService {
    * const latest = adaptiveStreamingService.getJobStatus("abc123");
    * console.log(latest?.status); // -> PROCESSING / COMPLETED / FAILED
    */
-  async processVideo(id: string, inputPath: string): Promise<AdaptiveStreamingJob> {
-    const outputDir = STORAGE_PATHS.getHlsPath(id);
-    await fs.ensureDir(outputDir);
+  async processVideo(
+    id: string,
+    inputPath: string,
+  ): Promise<AdaptiveStreamingJob> {
+    const outputDir = this.storage.getHlsPath(id);
+    await this.storage.ensureDir(outputDir);
 
     const job: AdaptiveStreamingJob = {
       id,
@@ -82,7 +89,11 @@ export class AdaptiveStreamingService {
     job.updatedAt = new Date().toISOString();
 
     // Step 4: Run FFmpeg
-    const ffmpeg = FfmpegAdapter.runHlsConversion(inputPath, outputDir, renditions);
+    const ffmpeg = FfmpegAdapter.runHlsConversion(
+      inputPath,
+      outputDir,
+      renditions,
+    );
 
     // Step 5: Listen for process completion
     ffmpeg.on('close', (code) => {

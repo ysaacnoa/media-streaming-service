@@ -8,9 +8,8 @@ import {
 } from '@nestjs/common';
 import { AdaptiveStreamingService } from './adaptive-streaming.service';
 import { VideoRecord } from 'src/video/types/video-record.type';
-import { STORAGE_PATHS } from 'src/config/storage.config';
-import * as fs from 'fs-extra';
 import * as path from 'path';
+import { StorageService } from 'src/storage/storage.service';
 
 /**
  * AdaptiveStreamingController
@@ -22,7 +21,7 @@ import * as path from 'path';
  *
  * The controller delegates heavy lifting to:
  *  - AdaptiveStreamingService (manages jobs & calls FFmpegAdapter)
- *  - STORAGE_PATHS helpers for resolving filesystem paths
+ *  - StorageService resolving filesystem paths
  *
  * Flow overview:
  *  1. Client uploads a video file (handled by another module).
@@ -41,6 +40,7 @@ import * as path from 'path';
 export class AdaptiveStreamingController {
   constructor(
     private readonly adaptiveStreamingService: AdaptiveStreamingService,
+    private readonly storage: StorageService,
   ) {}
 
   /**
@@ -60,11 +60,11 @@ export class AdaptiveStreamingController {
    */
   @Post(':id/process')
   async processVideo(@Param('id') id: string): Promise<any> {
-    const videoMetaPath = STORAGE_PATHS.getMetaPath(id);
+    const videoMetaPath = this.storage.getMetaPath(id);
 
     try {
-      const video: VideoRecord = await fs.readJson(videoMetaPath);
-      const filePath = STORAGE_PATHS.getUploadPath(video.filename);
+      const video: VideoRecord = await this.storage.readJson(videoMetaPath);
+      const filePath = this.storage.getUploadPath(video.filename);
       return this.adaptiveStreamingService.processVideo(id, filePath);
     } catch {
       throw new NotFoundException(`Video ${id} not found`);
@@ -125,12 +125,15 @@ export class AdaptiveStreamingController {
     @Param('id') id: string,
     @Param('file') file: string,
   ): Promise<StreamableFile> {
-    const filePath = path.join('storage', 'hls', id, file);
+    const filePath = this.storage.normalize(
+      path.join(this.storage.getHlsPath(id), file),
+    );
 
-    if (!(await fs.pathExists(filePath))) {
+    if (!(await this.storage.pathExists(filePath))) {
       throw new NotFoundException(`File ${file} not found for video ${id}`);
     }
 
-    return new StreamableFile(await fs.readFile(filePath));
+    const buffer = await this.storage.readFile(filePath);
+    return new StreamableFile(buffer);
   }
 }

@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { StorageService } from 'src/storage/storage.service';
 import { v4 as uuidv4 } from 'uuid';
-import * as fs from 'fs-extra';
 import { CreateVideoDto } from './dto/create-video.dto';
-import { STORAGE_PATHS } from 'src/config/storage.config';
 import { VideoRecord, VideoStatus } from './types/video-record.type';
 
 /**
@@ -11,6 +10,7 @@ import { VideoRecord, VideoStatus } from './types/video-record.type';
  */
 @Injectable()
 export class VideoService {
+  constructor(private readonly storage: StorageService) {}
   /**
    * Registers a newly uploaded video file by generating a unique identifier,
    * extracting its metadata, and saving that metadata to a JSON file on disk.
@@ -30,8 +30,8 @@ export class VideoService {
     const id = uuidv4();
 
     // Build paths using centralized config helpers
-    const storagePath = STORAGE_PATHS.getUploadPath(file.filename);
-    const metaPath = STORAGE_PATHS.getMetaPath(id);
+    const storagePath = this.storage.getUploadPath(file.filename);
+    const metaPath = this.storage.getMetaPath(id);
 
     const record: VideoRecord = {
       id,
@@ -46,11 +46,10 @@ export class VideoService {
     };
 
     // Ensure directories exist
-    await fs.ensureDir(STORAGE_PATHS.uploads);
-    await fs.ensureDir(STORAGE_PATHS.meta);
+    await this.storage.ensureDirs();
 
     // Persist metadata to disk as JSON
-    await fs.writeJson(metaPath, record, { spaces: 2 });
+    await this.storage.writeJson(metaPath, record);
 
     return record;
   }

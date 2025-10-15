@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Video {
+  id           String                 @id @default(uuid())
+  title        String?
+  originalName String
+  filename     String
+  size         Int
+  mimeType     String
+  status       VideoStatus            @default(UPLOADED)
+  createdAt    DateTime               @default(now())
+  url          String
+  jobs         AdaptiveStreamingJob[]
+}
+
+model AdaptiveStreamingJob {
+  id        String    @id @default(uuid())
+  videoId   String
+  outputDir String
+  status    JobStatus @default(PENDING)
+  error     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  inputUrl  String
+  video     Video     @relation(fields: [videoId], references: [id])
+}
+
+enum VideoStatus {
+  UPLOADED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum JobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}

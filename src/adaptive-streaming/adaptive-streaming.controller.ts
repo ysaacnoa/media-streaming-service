@@ -7,9 +7,9 @@ import {
   StreamableFile,
 } from '@nestjs/common';
 import { AdaptiveStreamingService } from './adaptive-streaming.service';
-import { VideoRecord } from 'src/video/types/video-record.type';
 import * as path from 'path';
 import { StorageService } from 'src/storage/storage.service';
+import { VideoEntity } from 'src/video/domain/video.entity';
 
 /**
  * AdaptiveStreamingController
@@ -58,18 +58,18 @@ export class AdaptiveStreamingController {
    *
    * @throws {NotFoundException} - If the video metadata JSON or file cannot be found
    */
-  @Post(':id/process')
-  async processVideo(@Param('id') id: string): Promise<any> {
-    const videoMetaPath = this.storage.getMetaPath(id);
+  // @Post(':id/process')
+  // async processVideo(@Param('id') id: string): Promise<any> {
+  //   const videoMetaPath = this.storage.getMetaPath(id);
 
-    try {
-      const video: VideoRecord = await this.storage.readJson(videoMetaPath);
-      const filePath = this.storage.getUploadPath(video.filename);
-      return this.adaptiveStreamingService.processVideo(id, filePath);
-    } catch {
-      throw new NotFoundException(`Video ${id} not found`);
-    }
-  }
+  //   try {
+  //     const video: VideoRecord = new VideoEntity();
+  //     const filePath = this.storage.getUploadPath(video.filename);
+  //     return this.adaptiveStreamingService.processVideo(id, filePath);
+  //   } catch {
+  //     throw new NotFoundException(`Video ${id} not found`);
+  //   }
+  // }
 
   /**
    * Query processing status for a video job.

@@ -14,13 +14,14 @@ export class MulterAdapter {
   /**
    * Returns a configured Multer `Options` object for handling video uploads.
    *
+   * @param storage - An implementation of IStorageService providing upload paths
    * @param maxSizeMB - Maximum allowed file size in megabytes (default: 100MB)
    * @returns A Multer configuration object to be used in `FileInterceptor`
    *
    * Example usage in a controller:
    * ```ts
    * @Post('upload')
-   * @UseInterceptors(FileInterceptor('file', MulterAdapter.videoUploadOptions()))
+   * @UseInterceptors(FileInterceptor('file', MulterAdapter.videoUploadOptions(storageService)))
    * uploadVideo(@UploadedFile() file: Express.Multer.File) { ... }
    * ```
    */

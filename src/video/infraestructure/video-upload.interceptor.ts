@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { StorageService } from 'src/storage/storage.service';
-import { MulterAdapter } from '../helpers/multer-adapter';
+import { MulterAdapter } from './multer-adapter';
 
 /**
  * Interceptor responsible for handling video file uploads using Multer,

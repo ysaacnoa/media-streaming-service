@@ -47,14 +47,6 @@ export class StorageService implements IStorageService {
     await fs.ensureDir(dirPath);
   }
 
-  async writeJson(filePath: string, data: any): Promise<void> {
-    await fs.writeJson(filePath, data, { spaces: 2 });
-  }
-
-  async readJson<T = any>(filePath: string): Promise<T> {
-    return fs.readJson(filePath);
-  }
-
   async readFile(filePath: string): Promise<Buffer> {
     return fs.readFile(filePath);
   }
